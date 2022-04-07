@@ -6,11 +6,12 @@
   "scripts": {
     "build": "tsc -b",
     "prepack": "rm -rf dist && npm build",
+    "ipfs:publish": "subql publish",
     "test": "jest",
     "codegen": "./node_modules/.bin/subql codegen"
   },
-  "homepage": "https://github.com/subquery/subql-starter",
-  "repository": "github:subquery/subql-starter",
+  "homepage": "https://github.com/parallel-finance/bridge-confirm-subql",
+  "repository": "https://github.com/parallel-finance/bridge-confirm-subql",
   "files": [
     "dist",
     "schema.graphql",

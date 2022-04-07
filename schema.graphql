@@ -1,17 +1,10 @@
-type StarterEntity @entity {
+type BridgeTx @entity {
+  id: ID!
 
-  id: ID! #id is a required field
+  originHash: String!
 
-  field1: Int!
+  address: String!
+  amount: String!
 
-  field2: String #filed2 is an optional field
-
-  field3: BigInt
-
-  field4: Date
-
-  field5: Boolean
-
-
-
+  confirmationHash: String!
 }

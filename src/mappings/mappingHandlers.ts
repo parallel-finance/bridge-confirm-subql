@@ -1,33 +1,123 @@
-import {SubstrateExtrinsic,SubstrateEvent,SubstrateBlock} from "@subql/types";
-import {StarterEntity} from "../types";
-import {Balance} from "@polkadot/types/interfaces";
+import {
+  SubstrateExtrinsic,
+  SubstrateEvent,
+  SubstrateBlock,
+} from '@subql/types'
+import { Balance, Extrinsic } from '@polkadot/types/interfaces'
+import { Vec } from '@polkadot/types'
+import { BridgeTx } from '../types'
 
+const PARALLEL_DOT_ASSET_ID = '101'
+const PARALLEL_BRIDGE_ADDR = 'p8EXJLShpofH8Lc8HfvZtFa8jMUieKLLferV5jk8ZZ6eTe2Kk'
+const POLKADOT_BRIDGE_ADDR = '13uccYxqNSHof1tdEoLVTEjHf3U5JUTbJMVPTynKsfhitDaa'
 
-export async function handleBlock(block: SubstrateBlock): Promise<void> {
-    //Create a new starterEntity with ID using block hash
-    let record = new StarterEntity(block.block.header.hash.toString());
-    //Record block number
-    record.field1 = block.block.header.number.toNumber();
-    await record.save();
+const parseRemark = (remark: { toString: () => string }) => {
+  logger.info(`Remark is ${remark.toString()}`)
+  return Buffer.from(remark.toString().slice(2), 'hex').toString('utf8')
 }
 
-export async function handleEvent(event: SubstrateEvent): Promise<void> {
-    const {event: {data: [account, balance]}} = event;
-    //Retrieve the record by its ID
-    const record = await StarterEntity.get(event.block.block.header.hash.toString());
-    record.field2 = account.toString();
-    //Big integer type Balance of a transfer event
-    record.field3 = (balance as Balance).toBigInt();
-    await record.save();
+export const isPolkadot = async (): Promise<boolean> => {
+  const lastRuntimeUpgrade = await api.query.system.lastRuntimeUpgrade()
+  if (lastRuntimeUpgrade.isNone) {
+    throw new Error('unsupported chain')
+  }
+  return lastRuntimeUpgrade.unwrap().specName.toString() === 'polkadot'
+}
+export async function handlePolkadotCall(
+  extrinsic: SubstrateExtrinsic
+): Promise<void> {
+  const calls = extrinsic.extrinsic.args[0] as Vec<Extrinsic>
+  if (
+    calls.length < 2 ||
+    !checkTransaction('system', 'remark', calls[0]) ||
+    !checkTransaction('balances', 'transfer', calls[1])
+  ) {
+    return
+  }
+  const [
+    {
+      args: [remarkRaw],
+    },
+    {
+      args: [addressRaw, amountRaw],
+    },
+  ] = calls.toArray()
+
+  if (extrinsic.extrinsic.signer.toString() !== POLKADOT_BRIDGE_ADDR) {
+    return
+  }
+
+  const blockHash = extrinsic.block.block.hash.toString()
+  const extrinsicHash = extrinsic.extrinsic.hash.toString()
+
+  const record = BridgeTx.create({
+    id: `${blockHash}-${extrinsic}`,
+    originHash: parseRemark(remarkRaw),
+    address: addressRaw.toString(),
+    amount: amountRaw.toString(),
+    confirmationHash: extrinsic.block.block.hash.toString(),
+  })
+
+  logger.info(JSON.stringify(record))
+  await record.save()
+}
+export async function handleParallelCall(
+  extrinsic: SubstrateExtrinsic
+): Promise<void> {
+  const calls = extrinsic.extrinsic.args[0] as Vec<Extrinsic>
+  if (
+    calls.length < 2 ||
+    !checkTransaction('system', 'remark', calls[0]) ||
+    !checkTransaction('assets', 'mint', calls[1])
+  ) {
+    return
+  }
+  const [
+    {
+      args: [remarkRaw],
+    },
+    {
+      args: [assetIdRaw, addressRaw, amountRaw],
+    },
+  ] = calls.toArray()
+
+  if (assetIdRaw.toString() !== PARALLEL_DOT_ASSET_ID) {
+    return
+  }
+
+  if (extrinsic.extrinsic.signer.toString() !== PARALLEL_BRIDGE_ADDR) {
+    return
+  }
+
+  const blockHash = extrinsic.block.block.hash.toString()
+  const extrinsicHash = extrinsic.extrinsic.hash.toString()
+
+  const record = BridgeTx.create({
+    id: `${blockHash}-${extrinsic}`,
+    originHash: parseRemark(remarkRaw),
+    address: addressRaw.toString(),
+    amount: amountRaw.toString(),
+    confirmationHash: extrinsic.block.block.hash.toString(),
+  })
+
+  logger.info(JSON.stringify(record))
+  await record.save()
 }
 
-export async function handleCall(extrinsic: SubstrateExtrinsic): Promise<void> {
-    const record = await StarterEntity.get(extrinsic.block.block.header.hash.toString());
-    //Date type timestamp
-    record.field4 = extrinsic.block.timestamp;
-    //Boolean tyep
-    record.field5 = true;
-    await record.save();
+async function handleCall(extrinsic: SubstrateExtrinsic): Promise<void> {
+  const isPolka = await isPolkadot()
+  if (isPolka) {
+    await handlePolkadotCall(extrinsic)
+  } else {
+    await handleParallelCall(extrinsic)
+  }
 }
 
-
+const checkTransaction = (
+  sectionFilter: string,
+  methodFilter: string,
+  call: Extrinsic
+) => {
+  const { section, method } = call.registry.findMetaCall(call.callIndex)
+  return section === sectionFilter && method === methodFilter
+}

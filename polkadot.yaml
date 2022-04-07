@@ -6,11 +6,11 @@ repository: 'https://github.com/parallel-finance/bridge-confirm-subql'
 schema:
   file: ./schema.graphql
 network:
-  endpoint: 'wss://regnet2-relay-rpc.parallel.fi'
-  genesisHash: '0x4d81c697b5559a627e03cd578c2cc0072fab6b58468cca8b2800465cd5d86a26'
+  endpoint: 'wss://polkadot.api.onfinality.io'
+  genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3'
 dataSources:
   - kind: substrate/Runtime
-    startBlock: 154774
+    startBlock: 9771922
     mapping:
       file: ./dist/index.js
       handlers:
