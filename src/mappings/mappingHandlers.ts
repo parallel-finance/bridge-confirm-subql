@@ -10,33 +10,35 @@ import { BridgeTx } from '../types'
 const POLKADOT_BRIDGE_ADDR = '1egYCubF1U5CGWiXjQnsXduiJYP49KTs8eX1jn1JrTqCYyQ'
 const POLKADOT_PROXY_ADDR = '15iswK1YfejPwJCgZjKkE4nL5MUYBxPdnfzbqMuk3pa147Qp'
 
-const parseRemark = (remark: { toString: () => string }) => {
-  logger.info(`Remark is ${remark.toString()}`)
-  return Buffer.from(remark.toString().slice(2), 'hex').toString('utf8')
-}
-
 export async function handlePolkadotCall(
   extrinsic: SubstrateExtrinsic
 ): Promise<void> {
   const real = extrinsic.extrinsic.args[0].toString()
   const realExtrinsic = extrinsic.extrinsic.args[2] as Extrinsic
   const calls = realExtrinsic.args[0] as Vec<Extrinsic>
+  logger.info(`real: ${real}, realExtrinsic: ${realExtrinsic.args.toString()}`)
+  calls.forEach((call) => {
+    logger.info(`call: ${call.args.toString()}`)
+  })
 
   if (
     calls.length < 2 ||
-    !checkTransaction('system', 'remark', calls[0]) ||
-    !checkTransaction('balances', 'transfer', calls[1])
+    !checkTransaction('system', 'remark', calls[1]) ||
+    !checkTransaction('balances', 'transfer', calls[0])
   ) {
     return
   }
   const [
     {
-      args: [remarkRaw],
-    },
-    {
       args: [addressRaw, amountRaw],
     },
+    {
+      args: [remarkRaw],
+    },
   ] = calls.toArray()
+  logger.info(
+    `remarkRaw: ${remarkRaw}, addressRaw: ${addressRaw.toString()}, amountRaw: ${amountRaw.toString()}`
+  )
 
   if (
     extrinsic.extrinsic.signer.toString() !== POLKADOT_PROXY_ADDR ||
@@ -50,7 +52,7 @@ export async function handlePolkadotCall(
 
   const record = BridgeTx.create({
     id: `${blockHash}-${extrinsic}`,
-    originHash: parseRemark(remarkRaw),
+    originHash: remarkRaw.toString(),
     address: addressRaw.toString(),
     amount: amountRaw.toString(),
     blockHeight: extrinsic.block.block.header.number.toNumber(),
