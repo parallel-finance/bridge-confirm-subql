@@ -55,6 +55,7 @@ export async function handlePolkadotCall(
     originHash: parseRemark(remarkRaw),
     address: addressRaw.toString(),
     amount: amountRaw.toString(),
+    blockHeight: extrinsic.block.block.header.number.toNumber(),
     confirmationHash: extrinsic.block.block.hash.toString(),
   })
 
@@ -97,6 +98,7 @@ export async function handleParallelCall(
     originHash: parseRemark(remarkRaw),
     address: addressRaw.toString(),
     amount: amountRaw.toString(),
+    blockHeight: extrinsic.block.block.header.number.toNumber(),
     confirmationHash: extrinsic.block.block.hash.toString(),
   })
 

@@ -1,10 +1,11 @@
 type BridgeTx @entity {
   id: ID!
 
-  originHash: String!
+  originHash: String! @index(unique: true)
 
-  address: String!
+  address: String! @index(unique: false)
   amount: String!
 
-  confirmationHash: String!
+  blockHeight: Int! @index(unique: false)
+  confirmationHash: String! @index(unique: true)
 }
