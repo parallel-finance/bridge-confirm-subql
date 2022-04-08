@@ -17,6 +17,6 @@ dataSources:
         - handler: handleCall
           kind: substrate/CallHandler
           filter:
-            module: utility
-            method: batchAll
+            module: proxy
+            method: proxy
             success: true

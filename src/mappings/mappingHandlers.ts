@@ -8,8 +8,9 @@ import { Vec } from '@polkadot/types'
 import { BridgeTx } from '../types'
 
 const PARALLEL_DOT_ASSET_ID = '101'
-const PARALLEL_BRIDGE_ADDR = 'p8EAeCGH2HWrWWWCvUJz5ayFUC9GFrKByvr8AkosRHj3FKghS'
-const POLKADOT_BRIDGE_ADDR = '158GuGBvLmKQNzuQdw3UNYTuxszu4WZzigQ7nhKzGfE7tRfg'
+const PARALLEL_BRIDGE_ADDR = 'p8F4qJh9mpENkatLLRgL5kVHmL95WSeKMhDEcFBjMGztktkiJ'
+const POLKADOT_BRIDGE_ADDR = '14E5nqKAp3oAJcmzgZhUD2RcptBeUBScxKHgJKU4HPNcKVf3'
+const POLKADOT_PROXY_ADDR = '15iswK1YfejPwJCgZjKkE4nL5MUYBxPdnfzbqMuk3pa147Qp'
 
 const parseRemark = (remark: { toString: () => string }) => {
   logger.info(`Remark is ${remark.toString()}`)
@@ -26,7 +27,10 @@ export const isPolkadot = async (): Promise<boolean> => {
 export async function handlePolkadotCall(
   extrinsic: SubstrateExtrinsic
 ): Promise<void> {
-  const calls = extrinsic.extrinsic.args[0] as Vec<Extrinsic>
+  const real = extrinsic.extrinsic.args[0].toString()
+  const realExtrinsic = extrinsic.extrinsic.args[2] as Extrinsic
+  const calls = realExtrinsic.args[0] as Vec<Extrinsic>
+
   if (
     calls.length < 2 ||
     !checkTransaction('system', 'remark', calls[0]) ||
@@ -43,7 +47,10 @@ export async function handlePolkadotCall(
     },
   ] = calls.toArray()
 
-  if (extrinsic.extrinsic.signer.toString() !== POLKADOT_BRIDGE_ADDR) {
+  if (
+    extrinsic.extrinsic.signer.toString() !== POLKADOT_PROXY_ADDR ||
+    real !== POLKADOT_BRIDGE_ADDR
+  ) {
     return
   }
 
