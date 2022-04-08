@@ -8,8 +8,8 @@ import { Vec } from '@polkadot/types'
 import { BridgeTx } from '../types'
 
 const PARALLEL_DOT_ASSET_ID = '101'
-const PARALLEL_BRIDGE_ADDR = 'p8EXJLShpofH8Lc8HfvZtFa8jMUieKLLferV5jk8ZZ6eTe2Kk'
-const POLKADOT_BRIDGE_ADDR = '13uccYxqNSHof1tdEoLVTEjHf3U5JUTbJMVPTynKsfhitDaa'
+const PARALLEL_BRIDGE_ADDR = 'p8EAeCGH2HWrWWWCvUJz5ayFUC9GFrKByvr8AkosRHj3FKghS'
+const POLKADOT_BRIDGE_ADDR = '158GuGBvLmKQNzuQdw3UNYTuxszu4WZzigQ7nhKzGfE7tRfg'
 
 const parseRemark = (remark: { toString: () => string }) => {
   logger.info(`Remark is ${remark.toString()}`)
