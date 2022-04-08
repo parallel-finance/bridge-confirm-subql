@@ -113,7 +113,7 @@ export async function handleParallelCall(
   await record.save()
 }
 
-async function handleCall(extrinsic: SubstrateExtrinsic): Promise<void> {
+export async function handleCall(extrinsic: SubstrateExtrinsic): Promise<void> {
   const isPolka = await isPolkadot()
   if (isPolka) {
     await handlePolkadotCall(extrinsic)
