@@ -10,13 +10,13 @@ network:
   genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3'
 dataSources:
   - kind: substrate/Runtime
-    startBlock: 9771922
+    startBlock: 9793100
     mapping:
       file: ./dist/index.js
       handlers:
         - handler: handleCall
           kind: substrate/CallHandler
           filter:
-            module: utility
-            method: batchAll
+            module: proxy
+            method: proxy
             success: true
