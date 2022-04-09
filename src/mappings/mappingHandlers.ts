@@ -7,8 +7,8 @@ import { Balance, Extrinsic } from '@polkadot/types/interfaces'
 import { Vec } from '@polkadot/types'
 import { BridgeTx } from '../types'
 
-const POLKADOT_BRIDGE_ADDR = '1egYCubF1U5CGWiXjQnsXduiJYP49KTs8eX1jn1JrTqCYyQ'
-const POLKADOT_PROXY_ADDR = '15iswK1YfejPwJCgZjKkE4nL5MUYBxPdnfzbqMuk3pa147Qp'
+const POLKADOT_BRIDGE_ADDR = '16Q5tghTd2XnZcxssizmAnWNcx3WMoJTHyNaAkFoZQAh4w3q'
+const POLKADOT_PROXY_ADDR = '145tUQ6JjEP9kL72Q9cfCaBLXKJM63oatvx7tAnQma9XVehV'
 
 export async function handlePolkadotCall(
   extrinsic: SubstrateExtrinsic
