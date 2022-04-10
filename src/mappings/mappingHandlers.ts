@@ -15,8 +15,14 @@ export async function handlePolkadotCall(
 ): Promise<void> {
   const real = extrinsic.extrinsic.args[0].toString()
   const realExtrinsic = extrinsic.extrinsic.args[2] as Extrinsic
+  if (!checkTransaction('utility', 'batchAll', realExtrinsic)) {
+    return
+  }
   const calls = realExtrinsic.args[0] as Vec<Extrinsic>
   logger.info(`real: ${real}, realExtrinsic: ${realExtrinsic.args.toString()}`)
+  calls.forEach((call) => {
+    logger.info(`call args: ${call.args.toString()}`)
+  })
 
   if (
     calls.length < 2 ||
