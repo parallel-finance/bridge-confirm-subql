@@ -20,6 +20,9 @@ export async function handlePolkadotCall(
   }
   const calls = realExtrinsic.args[0] as Vec<Extrinsic>
   logger.info(`real: ${real}, realExtrinsic: ${realExtrinsic.args.toString()}`)
+  calls.forEach((call) => {
+    logger.info(`call args: ${call.args.toString()}`)
+  })
 
   if (
     calls.length < 2 ||
